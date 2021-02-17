@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "gitea.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "gitea.name" . }}
+    helm.sh/chart: {{ include "gitea.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: 1
+  serviceName: {{ include "gitea.fullname" . }}-headless
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "gitea.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "gitea.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: INSTALL_LOCK
+              value: "{{ .Values.gitea.installLock }}"
+            - name: APP_NAME
+              value: "{{ .Values.gitea.appName }}"
+            - name: SSH_DOMAIN
+              value: "{{ .Values.gitea.sshDomain }}"
+            - name: SSH_PORT
+              value: "{{ .Values.gitea.sshPort }}"
+            - name: SSH_LISTEN_PORT
+              value: "22"
+            - name: ROOT_URL
+              value: "{{ .Values.gitea.protocol }}://{{ .Values.gitea.domain }}/"
+            - name: RUN_MODE
+              value: "prod" 
+            - name: REQUIRE_SIGNIN_VIEW
+              value: "true"
+            - name: DISABLE_REGISTRATION
+              value: "true"
+            - name: LEVEL
+              value: "Debug"
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+            - name: ssh
+              containerPort: 22
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ template "gitea.fullname" . }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        annotations: {}
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi

@@ -1,0 +1,13 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    jwt (2.2.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  jwt
+
+BUNDLED WITH
+   2.1.4

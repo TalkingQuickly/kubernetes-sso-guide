@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "gitea.fullname" . }}-ssh
+  labels:
+    app.kubernetes.io/name: {{ include "gitea.name" . }}-ssh
+    helm.sh/chart: {{ include "gitea.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  {{ if eq .Values.service.ssh.type "LoadBalancer"}}
+  type: LoadBalancer
+  ports:
+    - name: ssh
+      port: {{ .Values.service.ssh.port }}
+      targetPort: {{ .Values.service.ssh.targetPort }}
+  {{ else }}
+  type: NodePort
+  ports:
+    - port: {{ .Values.service.ssh.port }}
+      targetPort: {{ .Values.service.ssh.port }}
+      nodePort: {{ .Values.service.ssh.nodePort }}
+  {{ end }}
+
+  selector:
+    app.kubernetes.io/name: {{ include "gitea.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

@@ -1,0 +1,38 @@
+serverBlock: |
+  log_format    withauthheaders '$remote_addr - $remote_user [$time_local] '
+                    '"$request" $status  $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for" "$http_x_auth_request_access_token"';
+                    
+    add_header    x-auth-request-access-token "$http_x_auth_request_access_token";
+
+  # HTTP Server
+  server {
+      # Port to listen on, can also be set in IP:PORT format
+      listen  8080;
+
+      include  "/opt/bitnami/nginx/conf/bitnami/*.conf";
+
+      location /status {
+          stub_status on;
+          access_log   off;
+          allow 127.0.0.1;
+          deny all;
+      }
+
+      access_log /dev/stdout withauthheaders;
+  }
+
+ingress:
+  enabled: true
+  hostname: nginx-demo-app2.ssotest.staging.talkingquickly.co.uk
+  tls: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+    nginx.ingress.kubernetes.io/auth-url: "https://oauth.ssotest.staging.talkingquickly.co.uk/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://oauth.ssotest.staging.talkingquickly.co.uk/oauth2/start?rd=$scheme://$best_http_host$request_uri"
+    nginx.ingress.kubernetes.io/auth-response-headers: "x-auth-request-user, x-auth-request-email, x-auth-request-access-token"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    acme.cert-manager.io/http01-edit-in-place: "true"
+  
+service:
+  type: ClusterIP

@@ -1,0 +1,22 @@
+expose:
+  type: ingress
+  tls:
+    certSource: secret
+    secret:
+      secretName: harbor-ingress-tls
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-production
+
+    hosts:
+      core: core.harbor.ssotest.staging.talkingquickly.co.uk
+      
+harborAdminPassword: 85nsafg87ehfgk0fgsgfg6u
+externalURL: https://core.harbor.ssotest.staging.talkingquickly.co.uk
+secretKey: "8d10dlskeit8fhtg"
+
+notary:
+  enabled: false
+
+metrics:
+  enabled: true

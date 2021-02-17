@@ -1,0 +1,30 @@
+extraEnv: |
+  - name: KEYCLOAK_LOGLEVEL
+    value: DEBUG
+  - name: KEYCLOAK_USER
+    value: admin
+  - name: KEYCLOAK_PASSWORD
+    value: as897gsdfs766dfsgjhsdf
+  - name: PROXY_ADDRESS_FORWARDING
+    value: "true"
+
+args:
+  - -Dkeycloak.profile.feature.docker=enabled
+
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+  rules:
+    - host: sso.ssotest.staging.talkingquickly.co.uk
+      paths:
+        - /
+
+  tls:
+  - hosts:
+    - sso.ssotest.staging.talkingquickly.co.uk
+    secretName: keycloak-tld-secret
+
+postgresql:
+  enabled: true
+  postgresqlPassword: asdfaso97sadfjylfasdsf78

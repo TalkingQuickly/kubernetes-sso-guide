@@ -1,0 +1,29 @@
+configData:
+  auth:
+    token:
+      realm: https://sso.ssotest.staging.talkingquickly.co.uk/auth/realms/master/protocol/docker-v2/auth
+      service: simple-docker-registry
+      issuer: https://sso.ssotest.staging.talkingquickly.co.uk/auth/realms/master
+      rootcertbundle: /root-cert-bundle/localhost_trust_chain.pem
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  hosts:
+    - registry-keycloak.ssotest.staging.talkingquickly.co.uk
+
+  tls:
+  - hosts:
+    - registry-keycloak.ssotest.staging.talkingquickly.co.uk
+    secretName: keycloak-registry-tls-secret
+    
+extraVolumes:
+  - name: docker-registry-auth-token-rootcertbundle
+    secret:
+      secretName: docker-registry-auth-token-rootcertbundle
+
+extraVolumeMounts:
+  - mountPath: /root-cert-bundle
+    name: docker-registry-auth-token-rootcertbundle
+    readOnly: true

@@ -1,0 +1,24 @@
+oidc:
+  clientId: kube-oidc-proxy
+  issuerUrl: https://sso.ssotest.staging.talkingquickly.co.uk/auth/realms/master
+  usernameClaim: sub
+  usernamePrefix: "oidcuser:"
+  groupsClaim: groups
+  groupsPrefix: "oidcgroup:"
+
+extraArgs:
+  v: 10
+
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+  hosts:
+    - host: kube.ssotest.staging.talkingquickly.co.uk
+      paths:
+        - /
+  tls:
+    - secretName: oidc-proxy-tls
+      hosts:
+        - kube.ssotest.staging.talkingquickly.co.uk

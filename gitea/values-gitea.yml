@@ -1,0 +1,22 @@
+gitea:
+  domain: gitea-keycloak.k4stest4.talkingquickly.co.uk 
+  protocol: https
+  installLock: true
+
+service:
+  ssh:
+    type: NodePort
+    port: 22
+    nodePort: 30011
+
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+  hosts:
+    - host: gitea-keycloak.k4stest4.talkingquickly.co.uk
+      paths: ['/']
+  tls:
+   - secretName: gitea-keycloak-https-secret
+     hosts:
+       - gitea-keycloak.k4stest4.talkingquickly.co.uk
